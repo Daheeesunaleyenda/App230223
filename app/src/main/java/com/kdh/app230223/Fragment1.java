@@ -105,7 +105,10 @@ public class Fragment1 extends Fragment {
             btnStart.setVisibility(View.VISIBLE);
             btnStart.setText("다시하기");
             tvHide.setVisibility(View.VISIBLE);
-
+            for(int i = 0;i<moles.length;i++){
+                moles[i].setImageResource(R.drawable.mole2);
+                moles[i].setTag("0");
+            }
 
         }
     };
@@ -148,7 +151,7 @@ public class Fragment1 extends Fragment {
                     Message msg3 = new Message();
                     msg3.obj = tvScore;
                     showScoreHandler.sendMessage(msg3);
-                    break;
+                    return;
                 }
 
 
@@ -159,7 +162,7 @@ public class Fragment1 extends Fragment {
     class ThreadTime extends Thread{
         @Override
         public void run() {
-            for(int i = 3;i>=0;i--){
+            for(int i = 30;i>0;i--){
                 Message msg = new Message();
                 try {
                     Thread.sleep(1000);
@@ -173,7 +176,7 @@ public class Fragment1 extends Fragment {
 
             for(int i = 0; i<threads.length; i++){
                 threads[i].interrupt();
-                moles[i].setEnabled(false);
+//                moles[i].setEnabled(false);
             }
 
         }
