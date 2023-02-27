@@ -2,6 +2,10 @@ package com.kdh.app230223;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +35,8 @@ public class Fragment1 extends Fragment {
     TextView tvScore, tvHide;
     TextView tvTime;
     Button btnStart;
+    private SoundPool soundPool;
+    private int laugh, pop, tadaa, yay;
 
     Vibrator vibrator;
     @Override
@@ -41,6 +48,22 @@ public class Fragment1 extends Fragment {
         vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         tvHide = view.findViewById(R.id.tvHide);
         btnStart = view.findViewById(R.id.btnStart);
+
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+//            soundPool = new SoundPool.Builder().setMaxStreams(6)
+//                    .setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build();
+//        }else{
+//            soundPool = new SoundPool(6, AudioManager.STREAM_MUSIC,0);
+//        }
+//
+//        laugh = soundPool.load(getContext(), R.raw.laugh, 1);
+//        pop = soundPool.load(getContext(), R.raw.pop, 1);
+//        tadaa = soundPool.load(getContext(), R.raw.tadaa, 1);
+//        yay = soundPool.load(getContext(), R.raw.yay, 1);
+
+        getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+
         // 두더지 9개 findViewById
         btnStart.setOnClickListener(v->{
             cnt = 0;
@@ -61,12 +84,14 @@ public class Fragment1 extends Fragment {
                     public void onClick(View v) {
                         if(v.getTag().toString().equals("1")){
                             cnt++;
-                            Toast.makeText(getContext(), "잡았다 요놈", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getContext(), "잡았다 요놈", Toast.LENGTH_SHORT).show();
+                            soundPool.play(yay, 1,1,0,0,1);
                             v.setTag("0");
                             tvScore.setText(cnt+"");
 
                         }else{
-                            Toast.makeText(getContext(), "에이~ 아깝다!", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getContext(), "에이~ 아깝다!", Toast.LENGTH_SHORT).show();
+                            soundPool.play(laugh, 1,1,0,0,1);
                             cnt--;
                             tvScore.setText(cnt+"");
                             vibrator.vibrate(200);
@@ -80,10 +105,33 @@ public class Fragment1 extends Fragment {
         return view;
     }
 
+    public void onResume(){
+        super.onResume();
+        if(soundPool == null){
+            soundPool = new SoundPool(6, AudioManager.STREAM_MUSIC,0);
+                    laugh = soundPool.load(getContext(), R.raw.laugh, 1);
+                    pop = soundPool.load(getContext(), R.raw.pop, 1);
+                    tadaa = soundPool.load(getContext(), R.raw.tadaa, 1);
+                    yay = soundPool.load(getContext(), R.raw.yay, 1);
+        }
+    }
+
+    public void onPause(){
+        super.onPause();
+        if(soundPool!=null){
+            soundPool.release();
+            soundPool = null;
+        }
+    }
+
+
+
+
     Handler handler = new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
+            soundPool.play(pop,1,1,0,0,1);
             ((ImageView)msg.obj).setImageResource(msg.arg1);
             ((ImageView)msg.obj).setTag(msg.arg2);
         }
@@ -100,6 +148,7 @@ public class Fragment1 extends Fragment {
     Handler showScoreHandler = new Handler(){
         @Override
         public void handleMessage(@NonNull Message msg) {
+            soundPool.play(tadaa, 1,1,0,0,1);
             super.handleMessage(msg);
             ((TextView)msg.obj).setText("최종 점수 : "+cnt);
             btnStart.setVisibility(View.VISIBLE);
@@ -135,6 +184,7 @@ public class Fragment1 extends Fragment {
                     msg.obj = img;
                     msg.arg1 = R.drawable.mole3;
                     msg.arg2 = 1;
+
                     // 핸들러한테 보내줄 것임
                     handler.sendMessage(msg);
 
@@ -178,6 +228,7 @@ public class Fragment1 extends Fragment {
                 threads[i].interrupt();
 //                moles[i].setEnabled(false);
             }
+
 
         }
     }
